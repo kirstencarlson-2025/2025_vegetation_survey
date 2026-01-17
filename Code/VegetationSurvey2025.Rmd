@@ -1,0 +1,376 @@
+---
+title: "Vegetation Survey"
+author: "Kirsten Carlson"
+date: "2026-01-15"
+output: html_document
+---
+# Setup
+
+### Load packages and dataset
+```{r, echo=TRUE, results = 'hide', message=FALSE} 
+  library(tidyverse)
+  library(dplyr)  
+  library(vegan)
+  library(ggplot2)
+  library(forcats)
+  library(ggtext)
+  library(xfun)
+
+  VegetationSurvey_Data <- read.csv("VegetationSurvey_Data.csv")
+```
+
+### Tidy data
+```{r}
+# Convert VegetationSurvey_Data from wide to long format
+long_data <- VegetationSurvey_Data %>%
+  # Convert to long format
+  pivot_longer(
+    cols = -c(1:5),
+    names_to = "species",
+    values_to = "n_plants") %>%
+  # Replace NA with 0
+    replace_na(list(n_plants = 0L)) %>%
+  # Add total_plants column
+    group_by(Quadrat_ID) %>%
+    mutate(total_plants = sum(n_plants)) %>%
+    ungroup()
+
+# Convert VegetationSurvey_Data to species only
+species.df <- VegetationSurvey_Data %>%
+  select(,6:33) %>%
+  replace(is.na(.), 0)
+```
+
+
+# Summary Statistics
+
+### Mean number of plants
+```{r}
+# Calculate means
+mean_plants <- long_data %>%
+  distinct(Quadrat_ID, Ecosystem, total_plants) %>%
+  group_by(Ecosystem) %>%
+  summarise(mean_plants = mean(total_plants), label = paste0("Mean = ", round(mean_plants, 1)))
+
+ggplot(long_data, aes(total_plants, fill = Ecosystem)) +
+  geom_density(alpha = 0.5, adjust = 1.5) +
+  # Mean lines
+  geom_vline(
+    data = mean_plants,
+    aes(xintercept = mean_plants, color = Ecosystem),
+    linewidth = 1.2,
+    alpha = 0.6,
+    show.legend = FALSE
+  ) +
+  # Mean labels
+  geom_text(
+    data = mean_plants,
+    aes(x = mean_plants, y = Inf, label = label, color = Ecosystem),
+    angle = 0,
+    vjust = 5,
+    hjust = -.25,
+    size = 3.5,
+    show.legend = FALSE
+  ) +
+  theme_minimal() +
+  xlim(0,90) +
+  scale_fill_manual(values = c("Scrub" = "goldenrod",
+                               "Flatwoods" = "forestgreen"))+
+  scale_color_manual(values = c("Scrub" = "goldenrod",
+                               "Flatwoods" = "forestgreen"))+
+  labs(title = "Density plot of total plants per quadrat",
+       subtitle = "Bandwidth adjustment factor (adjust) set to 1.5",
+       y = "Density", 
+       x = "Number of Plants") +
+   theme(panel.grid = element_blank(),
+        plot.margin = margin(10,10,30,10),
+        plot.title = element_text(hjust = 0.5, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, face = "italic"))
+```
+
+### Mean soil moisture
+```{r}
+# Calculate means
+mean_soilmoisture <- long_data %>%
+  distinct(Quadrat_ID, Ecosystem, Soil_Moisture) %>%
+  group_by(Ecosystem) %>%
+  summarise(mean_soilmoisture = mean(Soil_Moisture), label = paste0("Mean = ", round(mean_soilmoisture, 1)))
+
+
+ggplot(long_data, aes(Soil_Moisture, fill = Ecosystem)) +
+  geom_density(alpha = 0.5, adjust = 1.5) +
+  # Mean lines
+  geom_vline(
+    data = mean_soilmoisture,
+    aes(xintercept = mean_soilmoisture, color = Ecosystem),
+    linewidth = 1.2,
+    alpha = 0.6,
+    show.legend = FALSE
+  ) +
+  # Mean labels
+  geom_text(
+    data = mean_soilmoisture,
+    aes(x = mean_soilmoisture, y = Inf, label = label, color = Ecosystem),
+    angle = 0,
+    vjust = 5,
+    hjust = -.25,
+    size = 3.5,
+    show.legend = FALSE
+  ) +
+  theme_minimal() +
+  scale_fill_manual(values = c("Scrub" = "goldenrod",
+                               "Flatwoods" = "forestgreen"))+
+  scale_color_manual(values = c("Scrub" = "goldenrod",
+                               "Flatwoods" = "forestgreen"))+
+  labs(title = "Density plot of soil moisture per quadrat",
+       subtitle = "Bandwidth adjustment factor (adjust) set to 1.5",
+       y = "Density", 
+       x = "Soil Moisture %") +
+  theme(panel.grid = element_blank(),
+        plot.margin = margin(10,10,30,10),
+        plot.title = element_text(hjust = 0.5, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, face = "italic"))
+```
+
+
+### Mean elevation 
+```{r}
+# Calculate means
+mean_elevation <- long_data %>%
+  distinct(Quadrat_ID, Ecosystem, Elevation) %>%
+  group_by(Ecosystem) %>%
+  summarise(mean_elevation = mean(Elevation), label = paste0("Mean = ", round(mean_elevation, 1)))
+
+ggplot(long_data, aes(Elevation, fill = Ecosystem)) +
+  geom_density(alpha = 0.5, adjust = 1.5) +
+  # Mean lines
+  geom_vline(
+    data = mean_elevation,
+    aes(xintercept = mean_elevation, color = Ecosystem),
+    linewidth = 1.2,
+    alpha = 0.6,
+    show.legend = FALSE
+  ) +
+  # Mean labels
+  geom_text(
+    data = mean_elevation,
+    aes(x = mean_elevation, y = Inf, label = label, color = Ecosystem),
+    angle = 0,
+    vjust = 5,
+    hjust = -.25,
+    size = 3.5,
+    show.legend = FALSE
+  ) +
+  theme_minimal() +
+  scale_fill_manual(values = c("Scrub" = "goldenrod",
+                               "Flatwoods" = "forestgreen"))+
+  scale_color_manual(values = c("Scrub" = "goldenrod",
+                               "Flatwoods" = "forestgreen"))+
+  labs(title = "Density plot of elevation per quadrat",
+       subtitle = "Bandwidth adjustment factor (adjust) set to 1.5",
+       y = "Density", 
+       x = "Elevation (ft)") +
+  theme(panel.grid = element_blank(),
+        plot.margin = margin(10,10,30,10),
+        plot.title = element_text(hjust = 0.5, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, face = "italic"))
+```
+
+# Visualizations
+
+### Total Plants per Quadrat
+
+```{r}
+# Group by quadrats and calculate total plants in each quadrat
+long_data <- long_data %>%
+  group_by(Ecosystem, Quadrat_ID, Soil_Moisture) %>%
+  # Add a total_plants column that is the sum of all plants in that Quadrat ID
+  mutate(total_plants = sum(n_plants, na.rm = TRUE)) %>%
+  ungroup() 
+# Print a summary table
+total_plants_summary <- long_data %>%
+  select(Ecosystem, Quadrat_ID, total_plants, Soil_Moisture) %>%
+  distinct()
+
+# Convert Quadrats to factor
+total_plants_summary <- total_plants_summary %>%
+  mutate(Quadrat_ID = as.factor(Quadrat_ID),
+         Quadrat_ID = fct_reorder2(Quadrat_ID, Ecosystem, total_plants))
+
+# Swap order of Ecosystems
+total_plants_summary$Ecosystem <- factor(
+  total_plants_summary$Ecosystem, levels = c("Scrub", "Flatwoods")
+)
+
+# ggplot of total plants per quadrat, ordered by quadrat and ecosystem
+ggplot(total_plants_summary, aes(x = Quadrat_ID, total_plants, fill = Ecosystem)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ Ecosystem, scales = "free_x", strip.position = "bottom") +
+  theme_minimal() +
+  scale_fill_manual(values = c("Scrub" = "goldenrod",
+                                "Flatwoods" = "forestgreen"))+
+  labs(title = "Total Plants per Quadrat",
+       y = "Total Plants", 
+       x = "Quadrats",
+       caption = "Figure 1. Total number of plants in each quadrat, ordered by greatest to least and by Ecosystem. Each bar represents one quadrat, with height representing total number of plants. The scrub ecosystem is colored yellow and the flatwoods ecosystem is colored green.") +
+  theme(axis.ticks.x = element_blank(), 
+        axis.text.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.margin = margin(10,10,30,10),
+        plot.title = element_text(hjust = 0.5, face = "bold"), # Centered, bold title
+        strip.placement = "outisde",
+        plot.caption = ggtext::element_textbox_simple(
+          size = 9,
+          width = unit(1, "npc"),
+          margin = margin(t = 20)
+        )
+  )
+```
+
+### PCoA of Jaccard distances
+```{r}
+# Presence-absence transform
+  pa <- decostand(species.df, method = "pa")
+
+# Jaccard distance on presence-absence data
+  dist_jaccard <- vegdist(pa, method = "jaccard")
+  
+# PCoA
+  pcoa_res <- cmdscale(dist_jaccard, eig = TRUE, k = 2)
+
+# PCoA points
+  pco <- as.data.frame(pcoa_res$points)
+  colnames(pco) <- c("PCoA1", "PCoA2")  
+
+# Convert VegetationSurvey_Data to ecosystem and soil moisture and add PCoA points
+  PCoA.df <- VegetationSurvey_Data %>%
+            select(Ecosystem, Soil_Moisture)
+  PCoA.df <- cbind(PCoA.df, pco)
+
+# Overlay envfit vectors
+  fit <- envfit(pcoa_res, PCoA.df[2], perm = 999)
+# Scale envfit vectors by correlation strength  
+  arrow <- as.data.frame(fit$vectors$arrows * fit$vectors$r)
+
+# Plot with ggplot2
+ ggplot(PCoA.df, aes(PCoA1, PCoA2, color = Ecosystem)) +
+    geom_point() +
+    stat_ellipse(type = "t", level = 0.95) +
+    # ADD ENVFIT ARROW
+    geom_segment(data = arrow,
+                 aes(x = 0, y = 0,
+                     xend = Dim1,
+                     yend = Dim2),
+                 arrow = arrow(length = unit(0.5, "cm")),
+                 color = "navy",
+                 linewidth = 1) +
+    geom_text(data = arrow,
+              aes(x = Dim1*0.8, y = Dim2*1.6, 
+                  label = "Soil Moisture"),
+              color = "navy",
+              size = 4) +
+    theme_minimal() +
+    scale_color_manual(values = c("Scrub" = "goldenrod",
+                                  "Flatwoods" = "forestgreen")) +
+    # Add titles
+   labs(
+     title = "PCoA of Jaccard dissimilarity",
+     caption = "Figure 2. Principal Coordinates Analysis (PCoA) of Jaccard dissimilarities calculated on presence-absence transformed plant species data. Points represent vegetation quadrats, with 95% confidence ellipses summarizing compositional variation within ecosystem types. The blue arrow indicates the direction and strength of correlation between soil moisture and community composition, fitted with envfit."
+   ) +
+     theme(
+      panel.grid = element_blank(),
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      plot.margin = margin(10,10,30,10),
+      plot.caption = ggtext::element_textbox_simple(
+          size = 9,
+          width = unit(1, "npc"),
+          margin = margin(t = 20)
+        )
+      )
+```   
+
+### Jaccard distance to group centroid by ecosystem 
+```{r}
+# PERMANOVA
+permanova <- adonis2(dist_jaccard ~ Ecosystem + Soil_Moisture + Elevation, VegetationSurvey_Data, by = "terms")
+permanova
+
+# Compute beta dispersion by ecosystem
+disp <- betadisper(dist_jaccard, group = VegetationSurvey_Data$Ecosystem)
+
+# Convert to a data frame for ggplot
+disp_df <- as.data.frame(scores(disp, display = "sites"))
+disp_df$Ecosystem <- VegetationSurvey_Data$Ecosystem
+
+# Add distances
+disp_df$Distance <- disp$distances
+
+# Set factor
+disp_df$Ecosystem <- factor(disp_df$Ecosystem,
+                            levels = c("Scrub", "Flatwoods"))
+
+# ggplot
+ggplot(disp_df, aes(x = Ecosystem, y = Distance, fill = Ecosystem)) +
+  geom_boxplot(alpha = 0.5, show.legend = FALSE) +
+  geom_jitter(width = 0.1, alpha = 0.6, show.legend = FALSE) +
+  labs(title = "Distance to group centroid by ecosystem",
+       x = "Ecosystem",
+       y = "Distance to group centroid",
+       caption = "Figure 3. Box and whisker plot of dispersion from presence-absence transformed Jaccard plant species data by Ecosystem. Yellow represents the scrub ecosystem and green represents the flatwoods ecosystem."
+         ) +
+  theme_minimal() +
+  scale_fill_manual(values = c("Scrub" = "goldenrod",
+                                "Flatwoods" = "forestgreen")) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    panel.grid.major.x = element_blank(),
+    plot.margin = margin(10,10,30,10),
+    plot.caption = ggtext::element_textbox_simple(
+      size = 9,
+      width = unit(1, "npc"),
+      margin = margin(t = 20)
+    )
+  )
+```
+
+### Linear regression of correlation between soil moisture and beta diversity
+```{r}
+# Add soil moisture data to disp_df
+disp_df$Soil_Moisture <- VegetationSurvey_Data$Soil_Moisture
+
+
+# ggplot
+ggplot(disp_df, aes(x = Soil_Moisture, y = Distance, color = Ecosystem)) +
+  geom_point(size = 2, show.legend = FALSE) +
+  geom_smooth(method = "lm", se = TRUE, alpha = 0.25) +
+  scale_color_manual(values = c("Scrub" = "goldenrod",
+                                "Flatwoods" = "forestgreen")) +
+  scale_x_continuous(
+    trans = "log10",
+    breaks = c(0.1, 0.17, 0.3, 0.6, 1.0, 1.3),   # raw values
+    labels = c(0.1, 0.17, 0.3, 0.6, 1.0, 1.3),   # raw labels
+    limits = c(0.1, 1.4),
+    name = "Soil Moisture (raw units, log10 scale)"
+  ) +
+  labs(
+    title = "Soil Moisture vs. Beta Diversity",
+    y = "Distance to Centroid (Jaccard Dissimilarity)",
+    caption = "Figure 4. Scatter plot of beta diversity by soil moisture content. Beta diversity is measued as presence-absence transformed Jaccard plant species data, and soil moisture is log10 transformed. Yellow represents the scrub ecosystem and green represents the flatwoods ecosystem. Linear regression lines show relationship of beta diversity to soil moisture within each ecosystem with 95% confidence intervals."
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.margin = margin(10,10,30,10),
+    plot.caption = ggtext::element_textbox_simple(
+      size = 9,
+      width = unit(1, "npc"),
+      margin = margin(t = 20)
+    )
+  )
+
+model_interaction <- lm(Distance ~ log10(Soil_Moisture) * Ecosystem, data = disp_df)
+summary(model_interaction)
+```
+
