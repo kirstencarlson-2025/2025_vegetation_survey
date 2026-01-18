@@ -35,6 +35,7 @@ PERMANOVA <br>
 |Residual | 14 | 4.0363 | 0.63516 |
 |Total | 17 | 6.3547 | 1.00000 | 
 <br>
+<br>
 Dispersion was then calculated with the *betadisper* from the *vegan* package and the distances to centroid was plotted by ecosystem. <br>
 ![Distance to centroid by ecosystem](Plots/Figure6.png)<br>
 ### Beta diversity vs. soil moisture content
