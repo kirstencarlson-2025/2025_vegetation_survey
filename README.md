@@ -27,10 +27,10 @@ To create the ordination, plant species data was first converted to presence-abs
 Using *adonis2* in the *vegan* package in R, I ran a PERMANOVA test on the Jaccard distances with the variables of ecosystem, soil moisture content, and elevation (999 permutations). Ecosystem explain the most variance, although soil moisture content was also statistically significant (P = 0.015) <br>
 <br>
 PERMANOVA <br>
-|  | Df | SumOfSqs | R2 | F Pr(>F) |
+|  | Df | SumOfSqs | R2 | F | Pr(>F) |
 |---|---|---|---|---|    
 |Ecosystem | 1 | 1.4130 | 0.22236 | 4.9011 | 0.001 ***|
 |Soil_Moisture | 1 | 0.5495 | 0.08647 | 1.9060 | 0.015 *|  
 |Elevation | 1 | 0.3559 | 0.05601 | 1.2346 | 0.255|
 |Residual | 14 | 4.0363 | 0.63516 |
-|Total |  | 17 | 6.3547 | 1.00000 |
+|Total | 17 | 6.3547 | 1.00000 |
