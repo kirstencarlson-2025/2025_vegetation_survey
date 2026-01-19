@@ -43,4 +43,4 @@ The vegetation survey was conducted under permit at Fox Lake Sanctuary (managed 
 <br>
 Soil samples (~100g) were collected from approximately 10 cm depth and and stored in sealed plastic bags in a cooler. Gravimetric soil analysis was conducted with 50 grams of each sample, measured in individually cut disposable tin cupcake holders. Samples were placed in an oven at 105 degrees Celcius for 24 hours. They were then placed in sealed plastic containers to cool for 15 minutes before reweighing. The soil moisture content was calculated with the equation: (wet soil mass - dry soil mass) / (dry soil mass). <br>
 <br>
-All analyses were conducted in R using the packages *tidyverse*, *ggplot2*, and *vegan*.
+All analyses were conducted in R using the package *vegan*.
